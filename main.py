@@ -29,6 +29,8 @@ def start():
             tic = time.time()
 
             mapping_file_df = get_mapping_file_df(MAPPING_FILE_DIR)
+            if mapping_file_df is None:
+                exit()
             invoice_number = file[:len(file)-4].replace("_","/") 
             print_bold_header(f"Invoice Number: {invoice_number}")
             file_path = os.path.join(INVOICE_FILE_DIR, file)
@@ -38,7 +40,8 @@ def start():
                 invoice_date, due_date = get_invoice_and_due_date(lst[2])
                 total_due, customer_name, total_tax, address_line_1, address_line_2 = get_total_due_and_customer_name(lst)
             team_summary = get_team_summary(INVOICE_BREAKDOWN_DIR, file)
-
+            if team_summary is None:
+                continue
             for country in team_summary:
                 df = team_summary[country]
                 category_column = df["Category"]

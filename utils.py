@@ -49,6 +49,7 @@ def get_team_summary(INVOICE_BREAKDOWN_DIR, file):
             sheet_to_df_map[sheet_name] = xls.parse(sheet_name)
     except Exception as e:
         print_bold_red(f"Unable to fetch team summary: {e}")
+        return None
     else:
         return sheet_to_df_map    
 
@@ -57,6 +58,9 @@ def get_mapping_file_df(MAPPING_FILE_DIR):
     files_list = list(files)
     if len(files_list) > 1:
         print_bold_red("More than one mapping file present in Mapping File Folder. Picking up 1st Mapping file for further processing...")
+    if len(files_list) == 0:
+        print_bold_red("No mapping file found.")
+        return None
     file = os.path.join(MAPPING_FILE_DIR,files_list[0])
     df = pd.read_csv(file)
     return df
