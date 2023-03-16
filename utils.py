@@ -39,42 +39,6 @@ def get_total_due_and_customer_name(list):
     else:
         return total_due_list[0], customer_name, total_tax_list[0], address_line_1, address_line_2
 
-def get_exchange_rate_df(pdf, INVOICE_DIR, filename):
-    try:
-        for page in pdf.pages:
-            txt = page.extract_text()
-            if "Exchange Rates" in txt:
-                page_no = page.page_number
-                lines = txt.split("\n")
-                for index, line in enumerate(lines):
-                    if line == "Exchange Rates":
-                        ex_list = lines[index:]
-                        ex_list.pop() if ex_list[-1].startswith("Page") else ex_list
-                break
-        txt = pdf.pages[page_no].extract_text()
-        if txt.startswith("Individual Team Summary"):
-            pass
-        else:
-            list = txt.split("\n")[1:]
-            for row in list:
-                if row.startswith("Page") or row.startswith("Individual Team Summary"):
-                    break
-                else:
-                    ex_list.append(row)
-        
-    except Exception as e:
-        print_bold_red(f"Unable to fetch exchange rate list: {e}")
-    else:
-        # exchange_rate = "\n".join(ex_list[1:])
-        # file = os.path.join(INVOICE_DIR, f"exchange_rate_{filename}.txt")
-        # with open(file, "w") as w:
-            # w.write(exchange_rate)
-        # with open(file, "r") as r:
-            # df = pd.read_csv(file, sep=" ")
-        # return df
-        return None
-
-
 def get_team_summary(INVOICE_BREAKDOWN_DIR, file):
     try:
         excel = f"Invoice Breakdown - {file[:len(file)-4]}.xlsx"
@@ -97,7 +61,7 @@ def get_mapping_file_df(MAPPING_FILE_DIR):
     df = pd.read_csv(file)
     return df
 
-def generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value):
+def generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity):
     data = {
                 "*ContactName": customer_name,
                 "EmailAddress": "",
@@ -118,7 +82,7 @@ def generate_data(customer_name, address_line_1, address_line_2, invoice_number,
                 "InvoiceAmountPaid": 0,
                 "InvoiceAmountDue": total_due.replace(",", ""),
                 "InventoryItemCode": "",
-                "*Description": f"{country} - {name} - {column} - {value}",
+                "*Description": f"{country} - {name} - {column} - {value} - {contracting_entity}",
                 "*Quantity": "",
                 "*UnitAmount": "",
                 "Discount": "",
