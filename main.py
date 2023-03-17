@@ -38,7 +38,7 @@ def start():
             with pdfplumber.open(file_path) as pdf:
                 txt = pdf.pages[0].extract_text()
                 lst = txt.split("\n")
-                invoice_date, due_date = get_invoice_and_due_date(lst[2])
+                invoice_date, due_date, invoice_period = get_invoice_and_due_date(lst[2])
                 total_due, customer_name, total_tax, address_line_1, address_line_2, currency = get_total_due_and_customer_name(lst)
             team_summary = get_team_summary(INVOICE_BREAKDOWN_DIR, file)
             if team_summary is None:
@@ -63,7 +63,7 @@ def start():
                                 file_object.close()
                                 contracting_entity = ["NONE"]
                             value = 0 if iloc[name] is np.nan else iloc[name].split(" ")[1]
-                            data = generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity[0], currency)
+                            data = generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity[0], currency, invoice_period)
                             
                             dataframe = pd.DataFrame([data])
                             invoice_file_path = os.path.join(SALES_INVOICE_DIR, f"SalesInvoice{file[:len(file)-4]}.csv")

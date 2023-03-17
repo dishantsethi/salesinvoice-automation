@@ -16,13 +16,13 @@ def get_invoice_and_due_date(str):
         lst = str.split(",")
         invoice_date = " ".join("".join(lst[:3]).split(" ")[:3])
         due_date = " ".join("".join(lst[2:5]).split(" ")[2:5])
+        invoice_period = "".join(lst[4:7]).split(" ")[4:7][-1] + "".join(lst[4:7]).split(" ")[4:7][0]
         invoice_datetime_obj = datetime.strptime(invoice_date, "%b %d %Y")
         due_date_datetime_obj = datetime.strptime(due_date, "%b %d %Y")
-
     except Exception as e:
         print_bold_red(f"Unable to fetch invoice date and invoice due date: {e}")
     else:
-        return invoice_datetime_obj.strftime("%d-%m-%y"), due_date_datetime_obj.strftime("%d-%m-%y")
+        return invoice_datetime_obj.strftime("%d-%m-%y"), due_date_datetime_obj.strftime("%d-%m-%y"), invoice_period
 
 def get_total_due_and_customer_name(list):
     try:
@@ -65,7 +65,7 @@ def get_mapping_file_df(MAPPING_FILE_DIR):
     df = pd.read_csv(file)
     return df
 
-def generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity, currency):
+def generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity, currency, invoice_period):
     data = {
                 "*ContactName": customer_name,
                 "EmailAddress": "",
@@ -86,7 +86,7 @@ def generate_data(customer_name, address_line_1, address_line_2, invoice_number,
                 "InvoiceAmountPaid": 0,
                 "InvoiceAmountDue": total_due.replace(",", ""),
                 "InventoryItemCode": "",
-                "*Description": f"{country} - {name} - {column} - {value} - {contracting_entity}",
+                "*Description": f"{country} : {name} : {column} : {value} : {contracting_entity} : {invoice_period}",
                 "*Quantity": "",
                 "*UnitAmount": value,
                 "Discount": "",
