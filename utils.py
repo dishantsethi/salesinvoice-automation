@@ -37,7 +37,7 @@ def get_total_due_and_customer_name(list):
     except Exception as e:
         print_bold_red(f"Unable to fetch Total Due/Total Tax/Cust Name/Address : {e}")
     else:
-        return total_due_list[0], customer_name, total_tax_list[0], address_line_1, address_line_2
+        return total_due_list[0], customer_name, total_tax_list[0], address_line_1, address_line_2, total_due_list[1]
 
 def get_team_summary(INVOICE_BREAKDOWN_DIR, file):
     try:
@@ -65,7 +65,7 @@ def get_mapping_file_df(MAPPING_FILE_DIR):
     df = pd.read_csv(file)
     return df
 
-def generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity):
+def generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity, currency):
     data = {
                 "*ContactName": customer_name,
                 "EmailAddress": "",
@@ -88,18 +88,18 @@ def generate_data(customer_name, address_line_1, address_line_2, invoice_number,
                 "InventoryItemCode": "",
                 "*Description": f"{country} - {name} - {column} - {value} - {contracting_entity}",
                 "*Quantity": "",
-                "*UnitAmount": "",
+                "*UnitAmount": value,
                 "Discount": "",
                 "LineAmount": "",
                 "*AccountCode": "",
                 "*TaxType": "",
                 "TaxAmount": "",
-                "TrackingName1": "", 
-                "TrackingOption1": "",
-                "TrackingName2": "",
-                "TrackingOption2": "",
-                "Currency": "",
-                "Type": "",
+                "TrackingName1": "LOB", 
+                "TrackingOption1": "Global Employment",
+                "TrackingName2": "Departments",
+                "TrackingOption2": "Platform-Compliance + Payments",
+                "Currency": currency,
+                "Type": "Sales Invoice",
                 "Sent": "",
                 "Status": ""
             }
