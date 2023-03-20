@@ -2,15 +2,18 @@ INVOICE_FILE_DIR = "/Users/dishantsethi/wofr/invoice_files"
 INVOICE_BREAKDOWN_DIR = "/Users/dishantsethi/wofr/invoice_breakdown_files"
 MAPPING_FILE_DIR = "/Users/dishantsethi/wofr/mapping_file"
 SALES_INVOICE_DIR = "/Users/dishantsethi/wofr/output_sales_invoice"
+LOB_FILE_DIR = "/Users/dishantsethi/wofr/LOB_file"
 column_names = [
-    "Net Pay",
+    "Gross Pay",
     "Employer Contributions - Social",
     "Employer Contributions - Health",
     "Employer Contributions - Others",
+    "Employer Contributions - Unemployment"
     "Amortisations/Accruals",
     "Other Charges",
     "Skuad Fee",
-    "Total Employer Cost"
+    "Refunds",
+    "Security Deposit"
 ]
 header_list = [
     "*ContactName",
@@ -28,10 +31,9 @@ header_list = [
     "*InvoiceDate",
     "*DueDate",
     "Total",
-    "TaxTotal",
+    "InventoryItemCode",
     "InvoiceAmountPaid",
     "InvoiceAmountDue",
-    "InventoryItemCode",
     "*Description",
     "*Quantity",
     "*UnitAmount",
@@ -44,8 +46,5 @@ header_list = [
     "TrackingOption1",
     "TrackingName2",
     "TrackingOption2",
-    "Currency",
-    "Type",
-    "Sent",
-    "Status"
+    "Currency"
 ]
