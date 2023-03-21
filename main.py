@@ -47,7 +47,7 @@ def start():
             team_summary = get_team_summary(INVOICE_BREAKDOWN_DIR, file)
             if team_summary is None:
                 continue
-            lob_row = lob_file_df[lob_file_df["Client Registered Name"].str.split().str.join(" ") == customer_name]
+            lob_row = lob_file_df[lob_file_df["Client Registered Name"].str.split().str.join(" ").str.lower() == customer_name.lower()]
             lob = lob_row["LOB"].values
             department = lob_row["Department"].values
             if len(lob) == 0 or len(department) == 0:

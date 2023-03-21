@@ -145,12 +145,10 @@ def generate_data(customer_name, address_line_1, address_line_2, invoice_number,
                 "Total": total_due.replace(",", ""),
                 "InventoryItemCode": "",
                 "InvoiceAmountPaid": 0,
-                "InvoiceAmountDue": total_due.replace(",", ""),
                 "*Description": f"{country} : {name} : {column} : {component_value} : {value} : {contracting_entity} : {invoice_period}",
                 "*Quantity": 1,
                 "*UnitAmount": value,
                 "Discount": "",
-                "LineAmount": "",
                 "*AccountCode": gl_code,
                 "*TaxType": tax_type,
                 "TaxAmount": float(value) * tax_percent / 100,
@@ -158,7 +156,8 @@ def generate_data(customer_name, address_line_1, address_line_2, invoice_number,
                 "TrackingOption1": lob,
                 "TrackingName2": "Departments",
                 "TrackingOption2": department,
-                "Currency": currency
+                "Currency": currency,
+                "BrandingTheme": ""
             }
     
     return data
