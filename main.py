@@ -17,7 +17,8 @@ from utils import (
     get_mapping_file_df,
     generate_data,
     get_gl_code,
-    get_lob_file_df
+    get_lob_file_df,
+    get_tax_type
 )
 import pandas as pd
 from colors import *
@@ -41,6 +42,7 @@ def start():
                 lst = txt.split("\n")
                 invoice_date, due_date, invoice_period = get_invoice_and_due_date(lst[2])
                 total_due, customer_name, total_tax, address_line_1, address_line_2, currency, invoice_number = get_total_due_and_customer_name_and_invoice_number(lst)
+                tax_percent = round(float(total_tax.replace(",","")) * 100 / (float(total_due.replace(",","")) - float(total_tax.replace(",",""))))
                 print_bold_header(f"Invoice Number: {invoice_number}")
             team_summary = get_team_summary(INVOICE_BREAKDOWN_DIR, file)
             if team_summary is None:
@@ -59,10 +61,12 @@ def start():
                 df = team_summary[country]
                 category_column = df["Category"]
                 component_column = df["Component"]
+                
                 for index, column in enumerate(category_column):
                     if column is np.nan:
-                        column = category_column[index-1]
+                        category_column[index] = category_column[index-1]
 
+                for index, column in enumerate(category_column):
                     if column in column_names:
                         iloc = df.iloc[index]
                         component_value = component_column[index] if component_column[index] is not np.nan else ""
@@ -80,7 +84,8 @@ def start():
                                 contracting_entity = ["NONE"]
                             value = 0 if iloc[name] is np.nan else iloc[name].split(" ")[1]
                             gl_code = get_gl_code(column, component_value,contracting_entity[0])
-                            data = generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity[0], currency, invoice_period, component_value, gl_code, lob[0], department[0])
+                            tax_type, tax_percent = get_tax_type(tax_percent, gl_code)
+                            data = generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, country, name, column, value, contracting_entity[0], currency, invoice_period, component_value, gl_code, lob[0], department[0], tax_percent, tax_type)
                             dataframe = pd.DataFrame([data])
                             invoice_file_path = os.path.join(SALES_INVOICE_DIR, f"SalesInvoice{file[:len(file)-4]}.csv")
                             headers = False if os.path.isfile(invoice_file_path) else header_list

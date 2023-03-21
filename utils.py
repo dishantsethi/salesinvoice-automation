@@ -113,8 +113,20 @@ def get_gl_code(category, component, contracting_entity):
     
     return gl_code
         
+def get_tax_type(tax_percent, gl_code):
+    tax_type = ""
+    if tax_percent == 8:
+        tax_type = "Standard-Rated Supplies"
+    if tax_percent == 0:
+        tax_type == "Zero-Rated Supplies"
+    if tax_percent == 7:
+        tax_type = "2022 Standard-Rated Supplies"
+    if gl_code == "4006":
+        tax_type = "No Tax"
+        tax_percent = 0
+    return tax_type, tax_percent
 
-def generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, total_tax, country, name, column, value, contracting_entity, currency, invoice_period, component_value, gl_code, lob, department):
+def generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, country, name, column, value, contracting_entity, currency, invoice_period, component_value, gl_code, lob, department, tax_percent, tax_type):
     data = {
                 "*ContactName": customer_name,
                 "EmailAddress": "",
@@ -140,8 +152,8 @@ def generate_data(customer_name, address_line_1, address_line_2, invoice_number,
                 "Discount": "",
                 "LineAmount": "",
                 "*AccountCode": gl_code,
-                "*TaxType": "",
-                "TaxAmount": float(value) * 8 / 100,
+                "*TaxType": tax_type,
+                "TaxAmount": float(value) * tax_percent / 100,
                 "TrackingName1": "LOB", 
                 "TrackingOption1": lob,
                 "TrackingName2": "Departments",
