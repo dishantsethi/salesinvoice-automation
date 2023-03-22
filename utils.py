@@ -118,7 +118,7 @@ def get_tax_type(tax_percent, gl_code):
     if tax_percent == 8:
         tax_type = "Standard-Rated Supplies"
     if tax_percent == 0:
-        tax_type == "Zero-Rated Supplies"
+        tax_type = "Zero-Rated Supplies"
     if tax_percent == 7:
         tax_type = "2022 Standard-Rated Supplies"
     if gl_code == "4006":
@@ -146,6 +146,7 @@ def generate_data(customer_name, address_line_1, address_line_2, invoice_number,
                 "InventoryItemCode": "",
                 "*Description": f"{country} : {name} : {column} : {component_value} : {value} : {contracting_entity} : {invoice_period}",
                 "*Quantity": 1,
+                "*UnitAmount": value,
                 "Discount": "",
                 "*AccountCode": gl_code,
                 "*TaxType": tax_type,

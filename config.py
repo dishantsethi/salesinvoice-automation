@@ -34,6 +34,7 @@ header_list = [
     "InventoryItemCode",
     "*Description",
     "*Quantity",
+    "*UnitAmount",
     "Discount",
     "*AccountCode",
     "*TaxType",
