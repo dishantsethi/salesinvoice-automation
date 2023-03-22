@@ -82,7 +82,9 @@ def start():
                                 file_object.write(f'{datetime.now().strftime("%H:%M:%S")} - {err}\n')
                                 file_object.close()
                                 contracting_entity = ["NONE"]
-                            value = 0 if iloc[name] is np.nan else iloc[name].split(" ")[1]
+                            value = 0.00 if iloc[name] is np.nan else iloc[name].split(" ")[1]
+                            if isinstance(value, str):
+                                value = float("{:.2f}".format(float(value)))
                             gl_code = get_gl_code(column, component_value,contracting_entity[0])
                             tax_type, tax_percent = get_tax_type(tax_percent, gl_code)
                             data = generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, country, name, column, value, contracting_entity[0], currency, invoice_period, component_value, gl_code, lob[0], department[0], tax_percent, tax_type)
