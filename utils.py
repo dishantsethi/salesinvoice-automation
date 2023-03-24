@@ -81,7 +81,7 @@ def get_lob_file_df(LOB_FILE_DIR):
 
 def get_gl_code(category, component, contracting_entity):
     gl_code = ""
-    if category in ["Gross Pay", "Employer Contributions - Social", "Employer Contributions - Health", "Employer Contributions - Others", "Employer Contributions - Unemployment", "Amortisations/Accruals"] and ("skuad" in contracting_entity.lower() or contracting_entity.lower() == "all remote"):
+    if category in ["Gross Pay", "Employer Contributions - Social", "Employer Contributions - Health", "Employer Contributions - Others", "Employer Contributions - Unemployment", "Amortisations/Accruals"] and ("skuad" in contracting_entity.lower() or "all remote" in contracting_entity.lower()):
         gl_code = "1024"
     if category in ["Skuad Fee"]:
         gl_code = "1020"
