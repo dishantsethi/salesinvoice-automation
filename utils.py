@@ -2,6 +2,14 @@ import os
 import pandas as pd
 from datetime import datetime
 from colors import *
+from config import (
+    category_for_1024_or_1026A_gl_code,
+    category_for_1020_gl_code,
+    category_for_1021_gl_code,
+    category_for_4006_gl_code,
+    other_changes_components_when_skuad_or_all_remote_in_contracting_entity,
+    other_changes_components_when_skuad_or_all_remote_NOT_in_contracting_entity
+)
 
 def listdir_nohidden(dir):
     for f in os.listdir(dir):
@@ -81,34 +89,35 @@ def get_lob_file_df(LOB_FILE_DIR):
 
 def get_gl_code(category, component, contracting_entity):
     gl_code = ""
-    if category in ["Gross Pay", "Employer Contributions - Social", "Employer Contributions - Health", "Employer Contributions - Others", "Employer Contributions - Unemployment", "Amortisations/Accruals"] and ("skuad" in contracting_entity.lower() or "all remote" in contracting_entity.lower()):
-        gl_code = "1024"
-    if category in ["Skuad Fee"]:
-        gl_code = "1020"
-    if category in ["Reimbursements"]:
-        gl_code = "1021"
-    if category in ["Other Charges"] and ("skuad" in contracting_entity.lower() or contracting_entity.lower() == "all remote"):
-        if component in ["Insurance Fee", "PF Admin Charges", "PF Admin Fee"]:
+    if category in category_for_1024_or_1026A_gl_code:
+        if ("skuad" in contracting_entity.lower() or "all remote" in contracting_entity.lower()):
             gl_code = "1024"
-        if component in ["Device Fee"]:
-            gl_code = "1020"
-        if component in ["Talent Subscription Fee"]:
-            gl_code = "1022"
-        if component in ["Others"]:
+        else:
             gl_code = "1026A"
+    
+    if category in category_for_1020_gl_code:
+        gl_code = "1020"
 
-    if category in ["Gross Pay", "Employer Contributions - Social", "Employer Contributions - Health", "Employer Contributions - Others", "Employer Contributions - Unemployment", "Amortisations/Accruals", ] and not ("skuad" in contracting_entity.lower() or contracting_entity.lower() == "all remote"):
-        gl_code = "1026A"
-    if category in ["Other Charges"] and not ("skuad" in contracting_entity.lower() or contracting_entity.lower() == "all remote"):
-        if component in ["Insurance Fee", "PF Admin Charges", "PF Admin Fee"]:
-            gl_code = "1026A"
-        if component in ["Device Fee"]:
-            gl_code = "1020"
-        if component in ["Talent Subscription Fee"]:
-            gl_code = "1022"
-        if component in ["Others"]:
-            gl_code = "1026A"
-    if category in ["Refunds", "Security Deposit"]:
+    if category in category_for_1021_gl_code:
+        gl_code = "1021"
+
+    if category in ["Other Charges"]:
+        if ("skuad" in contracting_entity.lower() or "all remote" in contracting_entity.lower()):
+            values_list = list(other_changes_components_when_skuad_or_all_remote_in_contracting_entity.values())
+            key_list = list(other_changes_components_when_skuad_or_all_remote_in_contracting_entity.keys())
+            for i in range(len(values_list)):
+                if component in values_list[i]:
+                    gl_code = key_list[i]
+                    break
+        else:
+            values_list = list(other_changes_components_when_skuad_or_all_remote_NOT_in_contracting_entity.values())
+            key_list = list(other_changes_components_when_skuad_or_all_remote_NOT_in_contracting_entity.keys())
+            for i in range(len(values_list)):
+                if component in values_list[i]:
+                    gl_code = key_list[i]
+                    break
+    
+    if category in category_for_4006_gl_code:
         gl_code = "4006"
     
     return gl_code

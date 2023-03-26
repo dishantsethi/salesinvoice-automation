@@ -1,13 +1,9 @@
 import pdfplumber
 from config import (
-    INVOICE_FILE_DIR,
-    MAPPING_FILE_DIR,
     column_names,
-    header_list,
-    INVOICE_BREAKDOWN_DIR,
-    SALES_INVOICE_DIR,
-    LOB_FILE_DIR
+    header_list
 )
+from files import *
 import os
 from utils import (
     get_files,
