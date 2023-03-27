@@ -88,39 +88,43 @@ def get_lob_file_df(LOB_FILE_DIR):
     return df
 
 def get_gl_code(category, component, contracting_entity):
-    gl_code = ""
-    if category in category_for_1024_or_1026A_gl_code:
-        if ("skuad" in contracting_entity.lower() or "all remote" in contracting_entity.lower()):
-            gl_code = "1024"
-        else:
-            gl_code = "1026A"
-    
-    if category in category_for_1020_gl_code:
-        gl_code = "1020"
+    try:
+        gl_code = ""
+        if category in category_for_1024_or_1026A_gl_code:
+            if ("skuad" in contracting_entity.lower() or "all remote" in contracting_entity.lower()):
+                gl_code = "1024"
+            else:
+                gl_code = "1026A"
+        
+        if category in category_for_1020_gl_code:
+            gl_code = "1020"
 
-    if category in category_for_1021_gl_code:
-        gl_code = "1021"
+        if category in category_for_1021_gl_code:
+            gl_code = "1021"
 
-    if category in ["Other Charges"]:
-        if ("skuad" in contracting_entity.lower() or "all remote" in contracting_entity.lower()):
-            values_list = list(other_changes_components_when_skuad_or_all_remote_in_contracting_entity.values())
-            key_list = list(other_changes_components_when_skuad_or_all_remote_in_contracting_entity.keys())
-            for i in range(len(values_list)):
-                if component in values_list[i]:
-                    gl_code = key_list[i]
-                    break
-        else:
-            values_list = list(other_changes_components_when_skuad_or_all_remote_NOT_in_contracting_entity.values())
-            key_list = list(other_changes_components_when_skuad_or_all_remote_NOT_in_contracting_entity.keys())
-            for i in range(len(values_list)):
-                if component in values_list[i]:
-                    gl_code = key_list[i]
-                    break
-    
-    if category in category_for_4006_gl_code:
-        gl_code = "4006"
-    
-    return gl_code
+        if category in ["Other Charges"]:
+            if ("skuad" in contracting_entity.lower() or "all remote" in contracting_entity.lower()):
+                values_list = list(other_changes_components_when_skuad_or_all_remote_in_contracting_entity.values())
+                key_list = list(other_changes_components_when_skuad_or_all_remote_in_contracting_entity.keys())
+                for i in range(len(values_list)):
+                    if component in values_list[i]:
+                        gl_code = key_list[i]
+                        break
+            else:
+                values_list = list(other_changes_components_when_skuad_or_all_remote_NOT_in_contracting_entity.values())
+                key_list = list(other_changes_components_when_skuad_or_all_remote_NOT_in_contracting_entity.keys())
+                for i in range(len(values_list)):
+                    if component in values_list[i]:
+                        gl_code = key_list[i]
+                        break
+        
+        if category in category_for_4006_gl_code:
+            gl_code = "4006"
+    except Exception as e:
+        print_bold_red(f"Error occured while fetching the gl code: {e}")
+        return ""
+    else:
+        return gl_code
         
 def get_tax_type(tax_percent, gl_code):
     tax_type = ""

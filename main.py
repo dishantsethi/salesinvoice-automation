@@ -54,41 +54,44 @@ def start():
                 lob = [""]
                 department = [""]
             for country in team_summary:
-                df = team_summary[country]
-                category_column = df["Category"]
-                component_column = df["Component"]
-                
-                for index, column in enumerate(category_column):
-                    if column is np.nan:
-                        category_column[index] = category_column[index-1]
+                try:
+                    df = team_summary[country]
+                    category_column = df["Category"]
+                    component_column = df["Component"]
+                    
+                    for index, column in enumerate(category_column):
+                        if column is np.nan:
+                            category_column[index] = category_column[index-1]
 
-                for index, column in enumerate(category_column):
-                    if column in column_names:
-                        iloc = df.iloc[index]
-                        component_value = component_column[index] if component_column[index] is not np.nan else ""
-                        for name in list(iloc.keys())[2:]:
-                            row = mapping_file_df[
-                                (mapping_file_df["Work Country"] == country) &
-                                (mapping_file_df["Employee Name"].str.split().str.join(" ") == " ".join(name.split()))
-                                ]
-                            contracting_entity = row["Contracting Entity"].values
-                            if len(contracting_entity) == 0:
-                                err = f"Unable to find name '{name}' in 'Employee Name' or '{country}' in 'Work Country' column of mapping sheet. Invoice File: {file}"
-                                file_object = open(f'errors{file[:len(file)-4]}.txt', 'a')
-                                file_object.write(f'{datetime.now().strftime("%H:%M:%S")} - {err}\n')
-                                file_object.close()
-                                contracting_entity = ["NONE"]
-                            value = 0.00 if iloc[name] is np.nan else iloc[name].split(" ")[1]
-                            if isinstance(value, str):
-                                value = float("{:.2f}".format(float(value)))
-                            gl_code = get_gl_code(column, component_value,contracting_entity[0])
-                            tax_type, tax_percent = get_tax_type(tax_percent, gl_code)
-                            data = generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, country, name, column, value, contracting_entity[0], currency, invoice_period, component_value, gl_code, lob[0], department[0], tax_percent, tax_type)
-                            dataframe = pd.DataFrame([data])
-                            invoice_file_path = os.path.join(SALES_INVOICE_DIR, f"SalesInvoice{file[:len(file)-4]}.csv")
-                            headers = False if os.path.isfile(invoice_file_path) else header_list
-                            dataframe.to_csv(invoice_file_path, mode='a', index=False, header=headers)
+                    for index, column in enumerate(category_column):
+                        if column in column_names:
+                            iloc = df.iloc[index]
+                            component_value = component_column[index] if component_column[index] is not np.nan else ""
+                            for name in list(iloc.keys())[2:]:
+                                row = mapping_file_df[
+                                    (mapping_file_df["Work Country"] == country) &
+                                    (mapping_file_df["Employee Name"].str.split().str.join(" ") == " ".join(name.split()))
+                                    ]
+                                contracting_entity = row["Contracting Entity"].values
+                                if len(contracting_entity) == 0 or len(contracting_entity) > 1:
+                                    err = f"Unable to find name '{name}' in 'Employee Name' or '{country}' in 'Work Country' column of mapping sheet. Invoice File: {file}" if len(contracting_entity) == 0 else f"Multiple entries found in mapping file for {name} of country {country}"
+                                    file_object = open(f'errors{file[:len(file)-4]}.txt', 'a')
+                                    file_object.write(f'{datetime.now().strftime("%H:%M:%S")} - {err}\n')
+                                    file_object.close()
+                                    contracting_entity = ["NONE"]
+                                value = 0.00 if iloc[name] is np.nan else iloc[name].split(" ")[1]
+                                if isinstance(value, str):
+                                    value = float("{:.2f}".format(float(value)))
+                                gl_code = get_gl_code(column, component_value,contracting_entity[0])
+                                tax_type, tax_percent = get_tax_type(tax_percent, gl_code)
+                                data = generate_data(customer_name, address_line_1, address_line_2, invoice_number, invoice_date, due_date, total_due, country, name, column, value, contracting_entity[0], currency, invoice_period, component_value, gl_code, lob[0], department[0], tax_percent, tax_type)
+                                dataframe = pd.DataFrame([data])
+                                invoice_file_path = os.path.join(SALES_INVOICE_DIR, f"SalesInvoice{file[:len(file)-4]}.csv")
+                                headers = False if os.path.isfile(invoice_file_path) else header_list
+                                dataframe.to_csv(invoice_file_path, mode='a', index=False, header=headers)
 
+                except Exception as e:
+                    print_bold_red(f"Error: {e}")
             print_bold_header(f"Sales invoice file generated: SalesInvoice{file[:len(file)-4]}.csv")
             toc = time.time()
             print_bold_green(f"Time Take: {toc-tic} seconds")
