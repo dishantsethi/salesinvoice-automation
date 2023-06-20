@@ -8,13 +8,17 @@ import os
 from utils import (
     get_files,
     get_invoice_and_due_date,
-    get_total_due_and_customer_name_and_invoice_number,
     get_team_summary,
     get_mapping_file_df,
     generate_data,
     get_gl_code,
     get_lob_file_df,
-    get_tax_type
+    get_tax_type,
+    get_currency,
+    get_total_due,
+    get_total_tax,
+    get_address,
+    get_due_date
 )
 import pandas as pd
 from colors import *
@@ -36,8 +40,13 @@ def start():
             with pdfplumber.open(file_path) as pdf:
                 txt = pdf.pages[0].extract_text()
                 lst = txt.split("\n")
-                invoice_date, due_date, invoice_period = get_invoice_and_due_date(lst[2])
-                total_due, customer_name, total_tax, address_line_1, address_line_2, currency, invoice_number = get_total_due_and_customer_name_and_invoice_number(lst)
+                invoice_date, invoice_number, invoice_period = get_invoice_and_due_date(lst[2])
+                currency = get_currency(lst[6])
+                due_date = get_due_date(lst)
+                customer_name = lst[8]
+                total_due = get_total_due(lst[7])
+                total_tax = get_total_tax(lst[6])
+                address_line_1, address_line_2 = get_address(lst)
                 tax_percent = round(float(total_tax.replace(",","")) * 100 / (float(total_due.replace(",","")) - float(total_tax.replace(",",""))))
                 print_bold_header(f"Invoice Number: {invoice_number}")
             team_summary = get_team_summary(INVOICE_BREAKDOWN_DIR, file)
@@ -48,7 +57,7 @@ def start():
             department = lob_row["Department"].values
             if len(lob) == 0 or len(department) == 0:
                 err = f"Unable to find Client '{customer_name}' in 'Client Registered Name' in LOB logic file"
-                file_object = open(f'errors{file[:len(file)-4]}.txt', 'a')
+                file_object = open(f'errors{file[:len(file)-4]}.txt', 'a', encoding="utf8")
                 file_object.write(f'{datetime.now().strftime("%H:%M:%S")} - {err}\n')
                 file_object.close()
                 lob = [""]
@@ -75,7 +84,7 @@ def start():
                                 contracting_entity = row["Contracting Entity"].values
                                 if len(contracting_entity) == 0 or len(contracting_entity) > 1:
                                     err = f"Unable to find name '{name}' in 'Employee Name' or '{country}' in 'Work Country' column of mapping sheet. Invoice File: {file}" if len(contracting_entity) == 0 else f"Multiple entries found in mapping file for {name} of country {country}"
-                                    file_object = open(f'errors{file[:len(file)-4]}.txt', 'a')
+                                    file_object = open(f'errors{file[:len(file)-4]}.txt', 'a', encoding="utf8")
                                     file_object.write(f'{datetime.now().strftime("%H:%M:%S")} - {err}\n')
                                     file_object.close()
                                     contracting_entity = ["NONE"]
