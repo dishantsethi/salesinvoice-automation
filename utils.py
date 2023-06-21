@@ -26,7 +26,11 @@ def get_invoice_and_due_date(str):
         invoice_number = lst[2].split(" ")[2]
         # due_date = " ".join("".join(lst[2:5]).split(" ")[2:5])
         # invoice_period = "".join(lst[4:7]).split(" ")[4:7][-1] + "".join(lst[4:7]).split(" ")[4:7][0]
-        invoice_period = lst[4].replace(" ", "").split("-")[1] + lst[4].replace(" ", "").split("-")[0]
+        A=lst[4].split(" ")
+        A.remove("") if "" in A else None
+        A.remove("-") if "-" in A else None
+        A.remove("\x00") if "\x00" in A else None
+        invoice_period = A[-1] + A[0]
         invoice_datetime_obj = datetime.strptime(invoice_date, "%b %d %Y")
         # due_date_datetime_obj = datetime.strptime(due_date, "%b %d %Y")
     except Exception as e:
