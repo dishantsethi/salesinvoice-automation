@@ -38,26 +38,14 @@ def get_invoice_and_due_date(str):
     else:
         return invoice_datetime_obj.strftime("%d-%m-%y"), invoice_number, invoice_period
 
-# def get_total_due_and_customer_name_and_invoice_number(lst):
-#     try:
-#         for index, i in enumerate(lst):
-#             if i.endswith("Total Due"):
-#                 total_due_list = list[index+1].split(" ")[-1:-3:-1]
-#                 total_tax_list = list[index+1].split(" ")[-3:-5:-1]
-#             if i.endswith("Bill To"):
-#                 customer_name = list[index+1]
-#                 address_line_1 = list[index+2]
-#                 address_line_2 = list[index+3]
-#             if i.endswith("Invoice Number"):
-#                 invoice_number = list[index+1].split(" ")[-1].replace("\x00", "-")
-#     except Exception as e:
-#         print_bold_red(f"Unable to fetch Total Due/Total Tax/Cust Name/Address/Invoice Number : {e}")
-#     else:
-#         return total_due_list[0], customer_name, total_tax_list[0], address_line_1, address_line_2, total_due_list[1], invoice_number
-
 def get_currency(lst):
+    currency = ""
     try:
-        currency = lst.split(" ")[0]
+        for l in lst:
+            if l.startswith("Billing To Customer Billing Address"):
+                currency = "".join(l.split("Billing To Customer Billing Address")).lstrip()[0:3]
+        if currency == "":
+            raise Exception
     except Exception as e:
         print_bold_red(f"Unable to fetch Currency : {e}")
     else:
@@ -65,43 +53,38 @@ def get_currency(lst):
 
 def get_due_date(lst):
     try:
-        if "Total Due Due by" in lst[5]:
-            date = lst[5].split(" ")[-1: -3: -1] + [lst[6].split(" ")[-1]]
-            date_str = "".join(date).replace(",", " ")
-            date_obj = datetime.strptime(date_str, "%d %b %Y")
-        else:
+        for index, l in enumerate(lst):
+            if "Total Due Due by" in l:
+                date = l.split(" ")[-1: -3: -1] + [lst[index+1].split(" ")[-1]]
+                date_str = "".join(date).replace(",", " ")
+                date_obj = datetime.strptime(date_str, "%d %b %Y")
+                total_due = lst[index+2].split(" ")[-1]
+                total_tax = lst[index + 1].split(" ")[-2]
+                address_line_1 = lst[index+4]
+                address_line_2 = lst[index+5]
+                break
+            
+    except Exception as e:
+        print_bold_red(f"Unable to fetch Due Date/Total Due: {e}")
+    else:
+        return date_obj.strftime("%d-%m-%y"), total_due, total_tax, address_line_1, address_line_2
+    
+def get_customer_name(lst, currency):
+    try:
+        customer_name = ""
+        for index, l in enumerate(lst):
+            if l.startswith("Billing To Customer Billing Address"):
+                customer_name = lst[index+1]
+                if customer_name.startswith(currency):
+                    customer_name = lst[index+2]
+                break
+        if customer_name == "":
             raise Exception
+            
     except Exception as e:
-        print_bold_red(f"Unable to fetch Due Date : {e}")
+        print_bold_red(f"Unable to fetch Customer name : {e}")
     else:
-        return date_obj.strftime("%d-%m-%y")
-    
-def get_total_due(lst):
-    try:
-        if lst.startswith("Billing To"):
-            total_due = lst.split(" ")[-1]
-        else:
-            raise Exception
-    except Exception as e:
-        print_bold_red(f"Unable to fetch Total Due : {e}")
-    else:
-        return total_due
-    
-def get_total_tax(lst):
-    try:
-        total_tax = lst.split(" ")[-2]
-    except Exception as e:
-        print_bold_red(f"Unable to fetch Total Tax : {e}")
-    else:
-        return total_tax
-    
-def get_address(lst):
-    try:
-        address_line_1, address_line_2 = lst[9], lst[10]
-    except Exception as e:
-        print_bold_red(f"Unable to fetch Address: {e}")
-    else:
-        return address_line_1, address_line_2
+        return customer_name
 
 def get_team_summary(INVOICE_BREAKDOWN_DIR, file):
     try:
