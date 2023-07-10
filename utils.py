@@ -10,6 +10,7 @@ from config import (
     other_changes_components_when_skuad_or_all_remote_in_contracting_entity,
     other_changes_components_when_skuad_or_all_remote_NOT_in_contracting_entity
 )
+from currencies import currencies
 
 def listdir_nohidden(dir):
     for f in os.listdir(dir):
@@ -41,34 +42,70 @@ def get_invoice_and_due_date(str):
 def get_currency(lst):
     currency = ""
     try:
-        for l in lst:
-            if l.startswith("Billing To Customer Billing Address"):
-                currency = "".join(l.split("Billing To Customer Billing Address")).lstrip()[0:3]
+        for l in lst[4:]:
+            for cur in currencies:
+                if l.find(cur) >= 0:
+                    return cur
         if currency == "":
             raise Exception
     except Exception as e:
         print_bold_red(f"Unable to fetch Currency : {e}")
-    else:
-        return currency
-
-def get_due_date(lst):
+    
+def get_address(page):
     try:
-        for index, l in enumerate(lst):
-            if "Total Due Due by" in l:
-                date = l.split(" ")[-1: -3: -1] + [lst[index+1].split(" ")[-1]]
-                date_str = "".join(date).replace(",", " ")
-                date_obj = datetime.strptime(date_str, "%d %b %Y")
-                total_due = lst[index+2].split(" ")[-1]
-                total_tax = lst[index + 1].split(" ")[-2]
-                address_line_1 = lst[index+4]
-                address_line_2 = lst[index+5]
-                break
-            
+        data = page.search("Billing To")[0]
+        x0 = data['x0']
+        top = data['top']
+        x1 = page.search("Amount")[0]['x1'] - 10
+        bottom = page.search("Overall Summary")[0]['top'] - 10
+        bounding_box = (x0, top, x1, bottom)
+        txt = page.crop(bounding_box).extract_text()
+        lst = txt.split("\n")
+        customer_name = lst[1]
+        address_line1 = lst[2]
+        address_line2 = ""
+        if len(lst) == 4:
+            address_line2 = lst[3]
+        return customer_name, address_line1, address_line2
+    except Exception as e:
+        print_bold_red(f"Unable to fetch Address and Customer name : {e}")
+
+def get_due_date(page):
+    try:
+        data = page.search("Total Due Due by")[0]
+        x0 = data['x0']
+        top = data['top']
+        x1 = page.width
+        bottom = data['bottom'] + 100
+        bounding_box = (x0, top, x1, bottom)
+        txt = page.crop(bounding_box).extract_text()
+        lst = txt.split("\n")
+        if lst[0].endswith("2023" or "2024"):
+            due_date_str = lst[0].replace("Total Due Due by ", "").replace(",","").replace(" ","")
+        else:
+            due_date_str = lst[0].replace("Total Due Due by ", "").replace(",","").replace(" ","") + lst[1]
+        due_date_obj = datetime.strptime(due_date_str, "%b%d%Y")
+        total_due = lst[-1].split(" ")[-1]            
     except Exception as e:
         print_bold_red(f"Unable to fetch Due Date/Total Due: {e}")
     else:
-        return date_obj.strftime("%d-%m-%y"), total_due, total_tax, address_line_1, address_line_2
+        return due_date_obj.strftime("%d-%m-%y"), total_due
     
+def get_total_tax(page):
+    try:
+        data = page.search("Invoice Number")[0]
+        x0 = data['x0']
+        top = data['top']
+        x1 = data['x1']
+        bottom = data['bottom'] + 80
+        bounding_box = (x0, top, x1, bottom)
+        txt = page.crop(bounding_box).extract_text()
+        lst = txt.split("\n")
+        total_tax= lst[-1].split(" ")[-1]
+    except Exception as e:
+        print_bold_red(f"Unable to fetch Total Tax: {e}")
+    else:
+        return total_tax
 def get_customer_name(lst, currency):
     try:
         customer_name = ""

@@ -16,7 +16,8 @@ from utils import (
     get_tax_type,
     get_currency,
     get_due_date,
-    get_customer_name
+    get_total_tax,
+    get_address
 )
 import pandas as pd
 from colors import *
@@ -40,8 +41,9 @@ def start():
                 lst = txt.split("\n")
                 invoice_date, invoice_number, invoice_period = get_invoice_and_due_date(lst[2])
                 currency = get_currency(lst)
-                due_date, total_due, total_tax, address_line_1, address_line_2 = get_due_date(lst)
-                customer_name = get_customer_name(lst, currency)
+                customer_name,address_line_1, address_line_2 = get_address(pdf.pages[0])
+                due_date, total_due = get_due_date(pdf.pages[0])
+                total_tax = get_total_tax(pdf.pages[0])
                 tax_percent = round(float(total_tax.replace(",","")) * 100 / (float(total_due.replace(",","")) - float(total_tax.replace(",",""))))
                 print_bold_header(f"Invoice Number: {invoice_number}")
             team_summary = get_team_summary(INVOICE_BREAKDOWN_DIR, file)
